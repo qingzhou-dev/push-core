@@ -1,0 +1,39 @@
+name: Publish to Maven Central Portal
+
+on:
+  release:
+    types: [published] # 只有当你在 GitHub 页面点击 "Create a new release" 时触发
+
+jobs:
+  publish:
+    name: Build and Publish
+    runs-on: ubuntu-latest
+    
+    steps:
+      # 1. 检出代码
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # 2. 设置 JDK 21 和 Maven 环境 (关键步骤)
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: 'maven'
+          
+          server-id: central 
+          server-username: MAVEN_USERNAME
+          server-password: MAVEN_PASSWORD
+          
+          # 自动导入 GPG 私钥到本地环境
+          gpg-private-key: ${{ secrets.GPG_PRIVATE_KEY }}
+          gpg-passphrase: MAVEN_GPG_PASSPHRASE
+
+      # 3. 执行发布 (包含编译、打包、文档、源码、签名、上传)
+      - name: Publish to Central Portal
+        run: mvn --batch-mode clean deploy -DskipTests
+        env:
+          MAVEN_USERNAME: ${{ secrets.CENTRAL_USERNAME }} 
+          MAVEN_PASSWORD: ${{ secrets.CENTRAL_PASSWORD }} 
+          MAVEN_GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }} 
