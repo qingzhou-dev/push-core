@@ -10,7 +10,7 @@
 
 ## 环境要求
 - Java 21+
-- Maven/Gradle
+- Maven
 
 ## 安装
 
@@ -18,7 +18,7 @@
 <dependency>
   <groupId>dev.qingzhou</groupId>
   <artifactId>push-core</artifactId>
-  <version>1.0.0-SNAPSHOT</version>
+  <version>1.0.0</version>
 </dependency>
 ```
 
