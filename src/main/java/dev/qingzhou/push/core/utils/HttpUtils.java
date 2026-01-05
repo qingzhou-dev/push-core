@@ -1,0 +1,108 @@
+package dev.qingzhou.push.core.utils;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.extern.slf4j.Slf4j;
+
+import java.net.URI;
+import java.net.URLEncoder;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.nio.charset.StandardCharsets;
+import java.time.Duration;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+@Slf4j
+public class HttpUtils {
+
+    // ???????????? Client (Java 11+ HttpClient ??????????????????)
+    private static final HttpClient CLIENT = HttpClient.newBuilder()
+            .connectTimeout(Duration.ofSeconds(10))
+            // .proxy(ProxySelector.of(new InetSocketAddress("127.0.0.1", 7890))) // ?????????????????????Telegram????????????????????????
+            .build();
+
+    private static final ObjectMapper MAPPER = new ObjectMapper();
+    private static final Duration REQUEST_TIMEOUT = Duration.ofSeconds(10);
+
+    /**
+     * ??????GET ?????? (?????????)
+     */
+    public static String get(String url) {
+        return get(url, null);
+    }
+
+    /**
+     * ??????GET ?????? (???????????????????????? URL ??????)
+     * @param url ??????URL
+     * @param params ??????Map (Key-Value)
+     */
+    public static String get(String url, Map<String, Object> params) {
+        try {
+            // 1. ??????????????????
+            String fullUrl = url;
+            if (params != null && !params.isEmpty()) {
+                String queryString = params.entrySet().stream()
+                        .map(entry -> encode(entry.getKey()) + "=" + encode(String.valueOf(entry.getValue())))
+                        .collect(Collectors.joining("&"));
+
+                // ?????????URL ?????????????????? '?'
+                fullUrl += (url.contains("?") ? "&" : "?") + queryString;
+            }
+
+            // 2. ????????????
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(fullUrl))
+                    .timeout(REQUEST_TIMEOUT)
+                    .GET()
+                    .build();
+
+            // 3. ??????
+            return execute(request);
+        } catch (Exception e) {
+            throw new RuntimeException("GET Request Failed: " + url, e);
+        }
+    }
+
+    /**
+     * ??????POST ?????? (JSON Body)
+     */
+    public static String post(String url, Object body) {
+        try {
+            String jsonBody = body instanceof String ? (String) body : MAPPER.writeValueAsString(body);
+
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(url))
+                    .timeout(REQUEST_TIMEOUT)
+                    .header("Content-Type", "application/json; charset=utf-8")
+                    .POST(HttpRequest.BodyPublishers.ofString(jsonBody))
+                    .build();
+
+            return execute(request);
+        } catch (Exception e) {
+            throw new RuntimeException("POST Request Failed: " + url, e);
+        }
+    }
+
+    /**
+     * ??????????????????
+     */
+    private static String execute(HttpRequest request) throws Exception {
+        HttpResponse<String> response = CLIENT.send(request, HttpResponse.BodyHandlers.ofString());
+
+        // ?????????????????????????????????????????????????????? API ?????? 400 ???????????? JSON ????????????????????????????????????
+        if (response.statusCode() >= 400) {
+            log.warn("HTTP Error: Status={}, Url={}, Body={}",
+                    response.statusCode(), request.uri(), response.body());
+        }
+        return response.body();
+    }
+
+    /**
+     * URL ??????????????????
+     */
+    private static String encode(String value) {
+        if (value == null) return "";
+        return URLEncoder.encode(value, StandardCharsets.UTF_8);
+    }
+}
