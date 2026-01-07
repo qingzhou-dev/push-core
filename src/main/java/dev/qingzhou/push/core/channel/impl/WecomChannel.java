@@ -192,9 +192,19 @@ public class WecomChannel extends AbstractChannel {
         // 这里直接传对象，Jackson 会根据 @Data 生成 getter 自动转 JSON
         // 企微字段: title, description, url, picurl
         // 注意：Java 字段是 picUrl，Jackson 默认转成 picUrl，但企微要 picurl (全小写)
-        // Article 类字段上加 @JsonProperty("picurl")
+        // 所以我们最好手动转一下 Map，或者在 Article 类字段上加 @JsonProperty("picurl")
 
-        body.put("news", Map.of("articles", articles));
+        // 这里采用最稳妥的手动转 Map 方式：
+        List<Map<String, String>> articleMaps = articles.stream().map(art -> {
+            Map<String, String> map = new HashMap<>();
+            map.put("title", art.getTitle());
+            map.put("description", art.getDescription());
+            map.put("url", art.getUrl());
+            map.put("picurl", art.getPicUrl()); // 注意这里 key 是全小写
+            return map;
+        }).toList();
+
+        body.put("news", Map.of("articles", articleMaps));
     }
 
     // 定义一个缓存 Key 的前缀，避免混淆
