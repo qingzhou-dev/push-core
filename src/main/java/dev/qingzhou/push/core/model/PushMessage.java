@@ -1,5 +1,6 @@
 package dev.qingzhou.push.core.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import dev.qingzhou.push.core.model.enums.MessageType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -132,6 +133,8 @@ public class PushMessage {
         private String title;
         private String description;
         private String url;
+
+        @JsonProperty("picurl")
         private String picUrl;
     }
 }

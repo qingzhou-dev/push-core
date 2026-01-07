@@ -149,13 +149,16 @@ public class WecomChannel extends AbstractChannel {
         card.put("description", description);
         // 卡片消息必须有跳转链接，如果用户没传 url，可以给个默认的或者抛错
         // 这里假设 PushMessage 里加了一个 url 字段，或者放在 extras 里
-        String url = "https://www.mazepeng.com";
+        String url = null;
         Map<String, Object> extras = message.getExtras();
         if (extras != null) {
             Object rawUrl = extras.get("url");
             if (rawUrl != null) {
                 url = rawUrl.toString();
             }
+        }
+        if (url == null || url.isBlank()) {
+            throw new IllegalArgumentException("TextCard message must have 'url' in extras");
         }
         card.put("url", url);
         card.put("btntxt", "详情"); // 按钮文字
@@ -189,19 +192,9 @@ public class WecomChannel extends AbstractChannel {
         // 这里直接传对象，Jackson 会根据 @Data 生成 getter 自动转 JSON
         // 企微字段: title, description, url, picurl
         // 注意：Java 字段是 picUrl，Jackson 默认转成 picUrl，但企微要 picurl (全小写)
-        // 所以我们最好手动转一下 Map，或者在 Article 类字段上加 @JsonProperty("picurl")
+        // Article 类字段上加 @JsonProperty("picurl")
 
-        // 这里采用最稳妥的手动转 Map 方式：
-        List<Map<String, String>> articleMaps = articles.stream().map(art -> {
-            Map<String, String> map = new HashMap<>();
-            map.put("title", art.getTitle());
-            map.put("description", art.getDescription());
-            map.put("url", art.getUrl());
-            map.put("picurl", art.getPicUrl()); // 注意这里 key 是全小写
-            return map;
-        }).toList();
-
-        body.put("news", Map.of("articles", articleMaps));
+        body.put("news", Map.of("articles", articles));
     }
 
     // 定义一个缓存 Key 的前缀，避免混淆
