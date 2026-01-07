@@ -19,11 +19,10 @@
         <maven.compiler.target>${java.version}</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-        <jackson.version>2.17.0</jackson.version>
-        <commons-codec.version>1.16.1</commons-codec.version>
+        <jackson.version>2.20.1</jackson.version>
+        <commons-codec.version>1.20.0</commons-codec.version>
         <lombok.version>1.18.32</lombok.version>
         <slf4j.version>2.0.17</slf4j.version>
-        <junit.version>5.10.2</junit.version>
     </properties>
 
     <dependencies>
@@ -50,13 +49,6 @@
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
             <version>${slf4j.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter</artifactId>
-            <version>${junit.version}</version>
-            <scope>test</scope>
         </dependency>
     </dependencies>
 
