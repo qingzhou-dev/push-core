@@ -28,7 +28,7 @@ public enum FeishuReceiveIdType {
     USER_ID("user_id"),
 
     /**
-     * 以用户的真实邮箱来标识用户。
+     * 以用户的电子邮件来标识用户。
      */
     EMAIL("email"),
 
