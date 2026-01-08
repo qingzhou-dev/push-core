@@ -57,6 +57,7 @@ public class FeishuChannel extends AbstractChannel {
         String token = getAccessToken(config.getAppKey(), config.getAppSecret());
 
         // Default receive_id_type is open_id
+        // See dev.qingzhou.push.core.model.enums.FeishuReceiveIdType
         String receiveIdType = "open_id";
         if (message.getExtras() != null && message.getExtras().containsKey("receive_id_type")) {
             receiveIdType = message.getExtras().get("receive_id_type").toString();
